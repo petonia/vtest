@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<meta charset="utf-8">
+  	<title>Vodafone Technical Test</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    
+    <div id="container"></div>
+
+	<script src="js/react.js"></script>
+    <script src="js/JSXTransformer.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/lodash.min.js"></script>
+
+
+    <script type="text/jsx">
+    /** @jsx React.DOM */
+
+    var currencyMap = [
+		{value : 'usDollarValue', 			label : 'US Dollor'},
+		{value : 'australianDollarValue', 	label : 'AU Dollor'},
+		{value : 'euroValue', 				label :'Euro'}
+    ], unitMap = {
+    	usDollarValue:'$ USD',
+    	australianDollarValue: '$ AU',
+    	euroValue: '\u20AC EURO'
+    };
+
+    /**
+     * Formating larg number net worth
+     * @param {String} currency 
+     * @param {Number} net
+     * @return Formatted net worth
+     */
+    function HCurrency ( currency, net ) { 
+    	return unitMap[currency] + ' ' + net.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    /**
+     * Currency converter react class 
+     * It's a drop-down element in application which used to converting net worth amount to local currency
+     */
+	var CurrencyConverter = React.createClass({
+		getInitialState: function() {
+			return {
+				selectedVal: this.props.items[0]
+			};
+		},
+		handleChange: function(e) {
+			this.setState({
+				selectedVal: e.target.value					
+			});
+
+			this.props.updateFilter(e.target.value);
+		},
+		render: function() {
+			var items = this.props.items.map(function(item) {
+				return <option value={item.value}>{item.label}</option>;
+			});
+
+			return (
+				<div>
+				<select value={this.state.selectedVal} onChange={this.handleChange}>
+					{items}
+				</select>
+				</div>
+			);
+		}
+	});
+
+	/**
+	 * Order by drop-down element
+	 */
+	var OrderBy = React.createClass({
+		getInitialState: function() {
+			return {
+				selectedVal: this.props.items[0]
+			};
+		},
+		handleChange: function(e) {
+			this.setState({
+				selectedVal: e.target.value					
+			});
+			this.props.updateFilter(e.target.value);
+		},
+		render: function() {
+			var items = this.props.items.map(function(item) {
+				return  <option value={item}>{item}</option>;
+			});
+
+			return (
+				<div>
+				<select value={this.state.selectedVal} onChange={this.handleChange}>
+					{items}
+				</select>
+				</div>
+			);
+		}
+	});
+
+	/**
+	 * Birth place drop-down element
+	 */
+	var BirthPlace = React.createClass({
+		getInitialState: function() {
+			return {
+				selectedVal: this.props.items[0]
+			};
+		},
+		handleChange: function(e) {
+			this.setState({
+				selectedVal: e.target.value					
+			});
+			this.props.updateFilter(e.target.value);
+		},
+		render: function() {
+			var items = this.props.items.map(function(item) {
+				return  <option value={item}>{item}</option>;;
+			});
+
+			return (
+				<div>
+				<select value={this.state.selectedVal} onChange={this.handleChange}>
+					{items}
+				</select>
+				</div>
+			);
+		}
+	});
+
+	/**
+	 * Search box element
+	 */
+	var SearchBox = React.createClass({
+		handleChange: function(){
+			var searchVal = this.refs.search.getDOMNode().value;
+			this.props.updateFilter(searchVal);
+		},
+
+		render: function() {
+			return (
+				<div>
+					<input type='text' ref='search' onChange={this.handleChange} placeholder='Search' />
+				</div>);
+		}
+	});
+
+	/**
+	 * Generates celebrities list
+	 */
+	var Celebritieslist = React.createClass({
+	    render: function() {
+	    	var items = this.props.items,
+	    		List;
+	    
+	    	if ( items.length === 0 ) {
+	    		List = ( <div className='error-panel'>No Results Found</div>);
+	    	} else {
+	    		List = this.props.items.map(function(celeb){
+				return (
+						<ul>
+							<li> No: {celeb.rank}</li>
+							<li> Name: {celeb.name}</li>
+							<li> Net Worth: {celeb.localNetWorth}</li>
+							<li> Age: {celeb.age}</li>
+							<li> Country of Birth: {celeb.country}</li>
+						</ul>
+					);
+	        	});
+	    	}      
+
+	        return (
+	            <div className='result-panel'>
+	                {List}
+	            </div>
+	        );
+	    }
+	});
+
+	var Application = React.createClass({
+
+	 	getInitialState: function() {
+		    return {
+		    	data 		: [],
+		    	searchValue	: null,
+				country 	: null,
+				orderby 	: null,
+				currency 	: 'usDollarValue',
+				errorMsg	: null,
+		    	loading 	: true
+		    };
+	  	},
+
+	  	componentDidMount : function() {
+			var self = this;
+			$.getJSON('celebrityRichList.json', function(json) {
+				self.setState({
+					data:json,
+					loading: false
+				});
+			});
+		},
+
+		/**
+		 * Initialize birth place list element 
+		 * @param {Array} celebrities array
+		 */
+		BirthPlaceList: function(celebrities) {
+			var list = ['Show All'];
+
+			$.each(celebrities, function(i, celeb){
+				if ($.inArray(celeb.country, list) == -1 ) {
+					list.push(celeb.country);
+				}
+			});
+			return list;
+		},
+
+		/**
+		 * on search update handler
+		 * @param  {String} searchVal
+		 */
+		handleUpdateSearch: function(searchVal) {
+			this.setState({
+				searchValue: searchVal
+			});
+		},
+
+		/**
+		 * on country update handler
+		 * @param  {String} selectedCountry 
+		 */
+		handleUpdateCountry: function(selectedCountry) {
+			this.setState({
+				country: selectedCountry
+			});
+		},
+
+		/**
+		 * on order by update handler
+		 * @param  {String} selectedOrderBy 
+		 */
+		handleUpdateOrderBy: function(selectedOrderBy) {
+			this.setState({
+				orderby: selectedOrderBy
+			});
+		},
+
+		/**
+		 * on currency update handler
+		 * @param  {String} selectedCurrency 
+		 */
+		handleUpdateCurrency: function(selectedCurrency){
+			this.setState({
+				currency: selectedCurrency
+			});
+		},	
+
+		render: function() {
+			var st = this.state;
+			var celebrities = st.data.celebrityList;
+			var referenceLink = st.data.referenceLink;
+			var orderBy = ['Rank', 'Name', 'Age'];
+
+			if (!st.loading) {
+				var BirthPlaces = this.BirthPlaceList(_.sortBy(celebrities, 'country'));
+
+				if (st.orderby) {
+					celebrities = _.sortBy(celebrities, st.orderby.toLowerCase() );
+				}
+
+				if (st.currency) {
+  					celebrities = _.forEach(celebrities, function(n, key) {
+ 						n.localNetWorth = HCurrency(st.currency, (n.netWorth) * st.data[st.currency]);
+ 						n.numeralLocalNetWorth = (n.netWorth) * st.data[st.currency];
+					});
+				}
+				
+				
+				if (st.country && st.country !== 'Show All') {
+					celebrities = _.filter(celebrities, function(item){
+					  return  item.country.indexOf(st.country) !== -1;
+					}.bind(this));
+				}
+
+				if (st.searchValue) {
+					celebrities = _.filter(celebrities, function(item){
+						var search 				= this.state.searchValue.toLowerCase();
+						var country 			= item.country.toLowerCase().indexOf(search) !== -1;
+						var name 				= item.name.toLowerCase().indexOf(search) !== -1;
+						var age 				= item.age.indexOf(search) !== -1;
+						var localNetWorth 		= item.localNetWorth.toString().indexOf(search) !== -1;
+						var numeralNetWorth 	= item.numeralLocalNetWorth.toString().indexOf(search) !== -1;
+					
+					  	return  country || name || age || localNetWorth || numeralNetWorth;
+					}.bind(this));
+				}
+				
+				var output = (<Celebritieslist items={celebrities} />);
+
+				return ( 
+					<div>
+						<div className='description-panel'>
+							<h1>{st.data.pageTitleH1}</h1>
+							<h2>{st.data.pageTitleH2}</h2>
+							<h3>{st.data.description}</h3>
+							<div className='reference'>
+								Reference:	<a href={referenceLink}>{referenceLink}</a>
+							</div>
+						</div>
+						<div className='filter-panel'>
+							<ul>
+								<li>
+									<span>BirthPlace:</span>
+									<BirthPlace items={BirthPlaces} updateFilter={this.handleUpdateCountry} />
+								</li>
+								<li>
+									<span>Currency Converter:</span>
+									<CurrencyConverter items={currencyMap} updateFilter={this.handleUpdateCurrency}/>
+								</li>
+								<li>
+									<span>Search:</span>
+									<SearchBox updateFilter={this.handleUpdateSearch} />
+								</li>
+								<li>
+									<span>OrderBy:</span>
+									<OrderBy items={orderBy} updateFilter={this.handleUpdateOrderBy} />
+								</li>
+							</ul>
+						</div>
+
+					   	{output}
+					   	{this.state.errorMsg}
+					</div>
+				)
+			} else {
+				return (<div>Loading</div>);
+			}
+		}
+	});
+
+	React.render(
+	  <Application />,
+	  document.getElementById('container')
+	);
+
+    </script>
+  </body>
+</html>

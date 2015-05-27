@@ -1,0 +1,124 @@
+html, body, ul {
+	margin: 0;
+	padding: 0;
+}
+
+#container {
+	width: 600px;
+	margin: 0 auto;
+	background: #f3f2f3;
+	font-family: Arial;
+}
+
+.description-panel {
+	background: #fff;
+	padding: 20px;
+}
+
+.description-panel h1,
+.description-panel h2,
+.description-panel h3 {
+	text-align: center;
+	font-weight: bold;
+}
+
+.description-panel h3 {
+	font-size: 12px;
+}
+
+.description-panel .reference {
+	font-size: 12px;
+	text-align: center;
+}
+
+.filter-panel,
+.result-panel  {
+	width: 90%;
+	margin: 0 auto;
+	font-size: 15px;
+	clear: both;
+}
+
+/*Filter Panel Style */
+.filter-panel ul {
+	list-style: none;
+}
+
+.filter-panel ul li {
+	width: 40%;
+	margin: 20px;
+	float: left;
+}
+.filter-panel ul li div {
+	padding: 7px 0;
+}
+.filter-panel ul li span {
+	display: block;
+}
+
+select {
+	width: 100%;
+	height: 30px;
+	border:1px solid #dfdedf;
+}
+
+input {
+	width: 97%;
+	padding: 5px;
+	height: 20px;
+	border:1px solid #dfdedf;
+}
+
+option:active,
+option:checked {
+  background: #054162;
+  color: #fff;
+}
+
+/*Result Panel Style */
+.result-panel {
+	border:1px solid #dfdedf;
+	margin: 15px auto;
+}
+.result-panel ul {
+	list-style: none;
+	border:1px solid #dfdedf;
+	margin:15px;
+}
+.result-panel ul li {
+	background: #fff;
+	padding: 7px;
+	text-align: center;
+}
+.result-panel ul li:first-child{
+	background: #054162;
+	color: #fff;
+}
+
+.error-panel {
+	margin:15px;
+	padding: 7px;
+	text-align: center;
+	background: #054162;
+	color: #fff;
+}
+
+/* tablet-max: 747px */
+@media screen and (max-width: 747px) {
+	#container {
+		width: 100%;
+	}
+	.filter-panel {
+		text-align: center;
+	}
+	.filter-panel ul {
+		width: 100%;
+	}
+	.filter-panel ul li {
+		width: 100%;
+		margin:0;
+		float: none;
+		display: block;
+	}
+	
+}
